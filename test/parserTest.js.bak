@@ -1,0 +1,197 @@
+var assert = require('assert');
+PR = require('../computeSolution');
+QI = require('../start');
+
+describe("parser basic load test", function() {
+	it("Should load parser", function() {
+		assert(Object.keys(new PR()).length > 0);
+	})
+})
+
+describe("Testing parser functionality", function() {
+	
+	it("Should save column names for later reference", function() {
+		var tokens = [ { token: 'what', position: { start: 0, end: 4 } },
+			{ token: 'is', position: { start: 4, end: 6 } },
+			{ token: 'the', position: { start: 6, end: 9 } },
+			{ token: 'join date', position: { start: 9, end: 17 }, columnName: 'joinDate', dataType:'DATETIME'},
+			{ token: 'when', position: { start: 17, end: 21 } },
+			{ token: 'jayasimha', position: { start: 21, end: 30 } },
+			{ token: 'joined', position: { start: 30, end: 36 } } ],
+		columnName = { joinDate: { name: 'join date', dataType: 'DATETIME' } },
+		parser = new PR(tokens);
+		assert.deepEqual(columnName, parser.getColumnNames())
+	});
+
+	it("Should give next tokens correctly", function() {
+		var tokens = [ { token: 'what', position: { start: 0, end: 4 } },
+			{ token: 'is', position: { start: 4, end: 6 } },
+			{ token: 'the', position: { start: 6, end: 9 } },
+			{ token: 'join date', position: { start: 9, end: 17 }, columnName: 'joinDate', dataType:'DATETIME'},
+			{ token: 'when', position: { start: 17, end: 21 } },
+			{ token: 'jayasimha', position: { start: 21, end: 30 } },
+			{ token: 'joined', position: { start: 30, end: 36 } } ],
+		parser = new PR(tokens);
+		assert.equal(null, parser.getCurrentToken());
+		parser.nextToken()
+		assert.deepEqual(tokens[0], parser.getCurrentToken());
+		parser.nextToken()
+		assert.deepEqual(tokens[1], parser.getCurrentToken());
+
+		parser = new PR(tokens);
+		for (var i = 0; i < tokens.length; i++) {
+			parser.nextToken();
+		}
+		assert.deepEqual({ token: 'joined', position: { start: 30, end: 36 } }, parser.getCurrentToken()); 
+		parser.nextToken();
+		assert.equal(null, parser.getCurrentToken());
+		parser.nextToken();
+		assert.equal(null, parser.getCurrentToken());
+	});
+
+
+	it("Should distinguish start tokens correctly", function() {
+
+		function callNextAndAssert(parser, bool) {
+			parser.nextToken();
+			assert.equal(bool, parser.isStartToken());
+		}
+		var tokens = [ { token: 'what', position: { start: 0, end: 4 } },
+			{ token: 'is', position: { start: 4, end: 6 } },
+			{ token: 'the', position: { start: 6, end: 9 } },
+			{ token: 'join date', position: { start: 9, end: 17 }, columnName: 'joinDate', dataType:'DATETIME'},
+			{ token: 'when', position: { start: 17, end: 21 } },
+			{ token: 'jayasimha', position: { start: 21, end: 30 } },
+			{ token: 'joined', position: { start: 30, end: 36 } } ],
+		parser = new PR(tokens);
+		assert.equal(false, parser.isStartToken());
+		callNextAndAssert(parser, true);
+		callNextAndAssert(parser, true);
+		callNextAndAssert(parser, true);
+		callNextAndAssert(parser, false);
+	})
+
+
+	it("Should distinguish start tokens correctly, when the questions begin with 'is' ", function() {
+
+		function callNextAndAssert(parser, bool) {
+			parser.nextToken();
+			assert.equal(bool, parser.isStartToken());
+		}
+		var query = "is google in company";
+		columns = [{'name':'company', 'dataType':'STRING'},
+						{'name':'salary', 'dataType':'DECIMAL'},
+						{'name':'joinDate', 'dataType':'DATETIME'},
+						{'name':'company name', 'dataType':'STRING'}];
+		var tokens = QI.getColumnTagged(query, columns),
+		parser = new PR(tokens);
+		parser.nextToken();
+		assert.equal(false, parser.isStartToken());
+	})
+
+	it("should find op tokens correctly", function() {
+		var query = "is google in company";
+		columns = [{'name':'company', 'dataType':'STRING'},
+						{'name':'salary', 'dataType':'DECIMAL'},
+						{'name':'joinDate', 'dataType':'DATETIME'},
+						{'name':'company name', 'dataType':'STRING'}];
+		var tokens = QI.getColumnTagged(query, columns),
+		parser = new PR(tokens);
+		parser.nextToken();
+		assert.equal(true, parser.isOPToken());
+	})
+
+	it("should find op tokens correctly found in the middle", function() {
+		var query = "what is company name by salary";
+		columns = [{'name':'company', 'dataType':'STRING'},
+						{'name':'salary', 'dataType':'DECIMAL'},
+						{'name':'joinDate', 'dataType':'DATETIME'},
+						{'name':'company name', 'dataType':'STRING'}];
+		var tokens = QI.getColumnTagged(query, columns),
+		parser = new PR(tokens);
+		parser.nextToken();
+		parser.nextToken();
+		parser.nextToken();
+		parser.nextToken();
+		assert.equal(true, parser.isOPToken());
+	})
+
+	it("should find mulitple op tokens correctly found in the middle", function() {
+		var query = "what is company name sort by salary";
+		columns = [{'name':'company', 'dataType':'STRING'},
+						{'name':'salary', 'dataType':'DECIMAL'},
+						{'name':'joinDate', 'dataType':'DATETIME'},
+						{'name':'company name', 'dataType':'STRING'}];
+		var tokens = QI.getColumnTagged(query, columns),
+		parser = new PR(tokens);
+		parser.nextToken();
+		parser.nextToken();
+		parser.nextToken();
+		parser.nextToken();
+		assert.equal(true, parser.isOPToken());
+		parser.nextToken();
+		assert.equal(true, parser.isOPToken());
+	})
+
+	it("should find column name tokens correctly", function() {
+		var query = "what is company name by salary";
+		columns = [{'name':'company', 'dataType':'STRING'},
+						{'name':'salary', 'dataType':'DECIMAL'},
+						{'name':'joinDate', 'dataType':'DATETIME'},
+						{'name':'company name', 'dataType':'STRING'}];
+		var tokens = QI.getColumnTagged(query, columns),
+		parser = new PR(tokens);
+		parser.nextToken();
+		parser.nextToken();
+		parser.nextToken();
+		assert.equal(true, parser.isColumnToken());
+	});
+
+	it("should skip all start tokens correctly", function() {
+
+		var query = "what is company name by salary";
+		columns = [{'name':'company', 'dataType':'STRING'},
+						{'name':'salary', 'dataType':'DECIMAL'},
+						{'name':'joinDate', 'dataType':'DATETIME'},
+						{'name':'company name', 'dataType':'STRING'}];
+		var tokens = QI.getColumnTagged(query, columns)
+		parser = new PR(tokens);
+		parser.parseTokens();
+		var parsedTokens = [ { token: 'what', position: { start: 0, end: 4 }, tag: 'START-TOKEN' },
+							{ token: 'is', position: { start: 4, end: 6 }, tag: 'START-TOKEN' },
+							{ token: 'company name', position: { start: 6, end: 17 }, columnName: 'company name', dataType: 'STRING', tag:'COLUMN-TOKEN' },
+							{ token: 'by', position: { start: 17, end: 19 } },
+							{ token: 'salary', position: { start: 19, end: 25 }, columnName: 'salary', dataType: 'DECIMAL' } ];
+		assert.deepEqual(parsedTokens, parser.getTokens());
+	});
+
+	it("should tag correctly questions of form <statement> <op> <column name>", function() {
+	console.log("%%%%%%%%%%%%%%%%%")
+		var query = "what is average salary";
+		columns = [{'name':'company', 'dataType':'STRING'},
+						{'name':'salary', 'dataType':'DECIMAL'},
+						{'name':'joinDate', 'dataType':'DATETIME'},
+						{'name':'company name', 'dataType':'STRING'}];
+		var tokens = QI.getColumnTagged(query, columns),
+		parser = new PR(tokens);
+		parser.parseTokens();
+		var parsedTokens = [{ token: 'what', position: { start: 0, end: 4 }, tag: 'START-TOKEN' },
+							{ token: 'is', position: { start: 4, end: 6 }, tag: 'START-TOKEN' },
+							{ token: 'average', position: { start: 6, end: 13 } },
+							{ token: 'salary', position: { start: 13, end: 19 }, columnName: 'salary',dataType: 'DECIMAL' } ]
+		assert.deepEqual(parsedTokens, parser.getTokens());
+	})
+
+	// it("should tag correctly questions of form <op> <column name>", function() {
+	// 	var query = "sort salary";
+	// 	columns = [{'name':'company', 'dataType':'STRING'},
+	// 					{'name':'salary', 'dataType':'DECIMAL'},
+	// 					{'name':'joinDate', 'dataType':'DATETIME'},
+	// 					{'name':'company name', 'dataType':'STRING'}];
+	// 	var tokens = QI.getColumnTagged(query, columns);
+	// 	// parser.parseTokens();
+	// 	// console.log(parser.getTokens());
+	// 	//assert.deepEqual(parsedTokens, parser.getTokens());
+	// })
+
+})
