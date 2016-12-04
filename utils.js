@@ -1,7 +1,7 @@
 define(["./node_modules/lodash/lodash.min"], function(_) {
 	var utils = (function () {
 		/**************************************/
-		var synset = {'least':'min', 'mean':'average', 'arrange':'sort', 'largest':'max'};
+		var synset = {'least':'min', 'mean':'average', 'arrange':'sort', 'largest':'max', 'total':'sum'};
 
 
 		/**************************************/
@@ -87,18 +87,30 @@ define(["./node_modules/lodash/lodash.min"], function(_) {
 			}
 		}
 
-		function bottomUpTagger(tokens, tagDict) {
-			tokens = _.cloneDeep(tokens);
+		function tagTokens(tokens, tagDict) {
 			for(var i = 1; i <= tokens.length; i++) {
 				gramTagger(tokens, tagDict, i);
 			}
+		}
+
+		function fillIgnore(tokens) {
+			for(var i = 0; i < tokens.length; i++) {
+				if(!('tag' in tokens[i])) {
+					tokens[i].tag = 'IGNORE';
+				}
+			}
+		}
+		function bottomUpTagger(tokens, tagDict) {
+			tokens = _.cloneDeep(tokens);
+			tagTokens(tokens, tagDict);
 			return combineTokens(tokens);
 		}
 
 		return {
 			bottomUpTagger:bottomUpTagger,
 			replaceSynonyms:replaceSynonyms,
-			simpleStemmer:simpleStemmer
+			simpleStemmer:simpleStemmer,
+			fillIgnore:fillIgnore
 		}
 	})();
 

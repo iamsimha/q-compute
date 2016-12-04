@@ -111,22 +111,107 @@ describe("Operator testing", function() {
 
 
 describe.only("Verify that recursive answering works", function () {
-	var dataset = {'company':['Google', 'Facebook', 'Palantir', 'Quora', 'Microsoft'],
-				'salary':[1, 2, 3, 4, 5]};
-	it("tokenize words correctly", function() {
-		var query = "what is max value of salary";
-		var columns = {
-			'company':{tag:'COLUMN', info :{dataType:'STRING'}},
-			'salary':{tag:'COLUMN', info:{dataType:'DECIMAL'}}
-		};
-		var operators = {
-			'average':{tag:'OP'},
-			'max':{tag:'OP'},
-			'min':{tag:'OP'},
-			'median':{tag:'OP'}
-		}
-		var tagDict = (_.extend({}, columns, operators));
-		magic = new expr(dataset, tagDict);
-		compute = magic.answerRecursive(query);
+	var dataset = {'country':['USA', 'Germany', 'France', 'China', 'Britain'],
+				'population':[318.9, 80.62, 66.03, 1357, 64.1],
+				'capital':['Washinton DC', 'Berlin', 'Paris', 'Beijing', 'London']};
+	
+	it("indicate error if column lengths are not equal", function () {
+		var query = "salary",
+		columns = [{name:'country', dataType:'STRING'}, {name:'population', dataType:'DECIMAL'}];
+
+		var dataset = {'country':['USA', 'Germany', 'France', 'China', 'Britain'],
+					'population':[318.9, 80.62, 66.03, 1357]};
+		magic = new expr(dataset, columns);
+		assert.deepEqual({ errMsg: 'dataset is not valid, use getErrorMsg() for more info' }, magic.answer(query));
+	});
+
+	it("verify that correct answers are given for a column name", function() {
+		var query = "what is population";
+		var columns = [{name:'country', dataType:'STRING'}, {name:'population', dataType:'DECIMAL'}];
+		magic = new expr(dataset, columns);
+		compute = magic.answer(query);
+		assert.deepEqual([ 318.9, 80.62, 66.03, 1357, 64.1 ], compute.values)
+	})
+
+	it("verify that correct answers are given for max", function() {
+		var query = "what is max value of population";
+		var columns = [{name:'country', dataType:'STRING'}, {name:'population', dataType:'DECIMAL'}];
+		magic = new expr(dataset, columns);
+		compute = magic.answer(query);
+		assert.deepEqual([1357], compute.values)
+
+		query = "what is maximum value of population";
+		compute = magic.answer(query);
+		assert.deepEqual([1357], compute.values);
+	})
+
+	it("verify that correct answers are given for min", function() {
+		var query = "what is min value of population";
+		var columns = [{name:'country', dataType:'STRING'}, {name:'population', dataType:'DECIMAL'}];
+		magic = new expr(dataset, columns);
+		compute = magic.answer(query);
+		assert.deepEqual([64.1], compute.values)
+
+		query = "what is minimum value of population";
+		compute = magic.answer(query);
+		assert.deepEqual([64.1], compute.values);
+
+		query = "what is least value of population";
+		compute = magic.answer(query);
+		assert.deepEqual([64.1], compute.values);
+	})
+
+	it("verify that we get corect answers for average", function () {
+		var query = "what is the average population";
+		var columns = [{name:'country', dataType:'STRING'}, {name:'population', dataType:'DECIMAL'}];
+		magic = new expr(dataset, columns);
+		compute = magic.answer(query);
+		assert.deepEqual([377.33], compute.values)
+
+		query = "what is the mean population";
+		compute = magic.answer(query);
+		assert.deepEqual([377.33], compute.values)
+	})
+
+	it("verify that we get corect answers for sum", function () {
+		var query = "what is the sum population";
+		var columns = [{name:'country', dataType:'STRING'}, {name:'population', dataType:'DECIMAL'}];
+		magic = new expr(dataset, columns);
+		compute = magic.answer(query);
+		assert.deepEqual([1886.6499999999999], compute.values);
+
+		query = "what is the total population";
+		compute = magic.answer(query);
+		assert.deepEqual([1886.6499999999999], compute.values);
+	})
+
+	it("verify that selection queries work correctly", function() {
+		var query = "what is capital of USA",
+		columns = [{name:'country', dataType:'STRING'}, {name:'population', dataType:'DECIMAL'}, {name:'capital', dataType:'STRING'}];
+		magic = new expr(dataset, columns);
+		compute = magic.answer(query);
+		assert.deepEqual(['Washinton DC'], compute.values);
+	})
+
+	it("verify that selection queries work correctly", function() {
+		var query = "what is the average temperature of India",
+		columns = [{name:'country', dataType:'STRING'}, {name:'temperature', dataType:'DECIMAL'}, {name:'district', dataType:'STRING'}],
+		dataset = {'country':['India', 'USA', 'India', 'India', 'Britain'],
+					'temperature':[40.5, 10.8, 31.5, 32.5, 12.5],
+					'capital':['Washinton DC', 'Berlin', 'Paris', 'Beijing', 'London']};
+		magic = new expr(dataset, columns);
+		compute = magic.answer(query);
+		assert.deepEqual([34.833333333333336], compute.values);
+	})
+
+	it("verify that selection queries work correctly", function() {
+		var query = "what is the average temperature when country is India",
+		columns = [{name:'country', dataType:'STRING'}, {name:'temperature', dataType:'DECIMAL'}, {name:'district', dataType:'STRING'}],
+		dataset = {'country':['India', 'USA', 'India', 'India', 'Britain'],
+					'temperature':[40.5, 10.8, 31.5, 32.5, 12.5],
+					'capital':['Washinton DC', 'Berlin', 'Paris', 'Beijing', 'London']};
+		magic = new expr(dataset, columns);
+		compute = magic.answer(query);
+		assert.deepEqual([34.833333333333336], compute.values);
 	})
 })

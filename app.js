@@ -19,7 +19,7 @@ require(['./jquery.min', './semantic/dist/semantic.min'], function() {
       var columns = [{'name':'Location', 'dataType':'STRING'},
               {'name':'Duration', 'dataType':'DECIMAL'},
               {'name':'Agent name', 'dataType':'STRING'},
-              {'name':'Wait Time', 'dataType':'DECIMAL'}],
+              {'name':'Wait Time', 'dataType':'DECIMAL'}];
           dataset = {'Location':['Bangalore', 'Delhi', 'Bangalore', 'Bellary', 'Hyderabad', 'Bellary'],
             'Duration':[120, 135, 88, 225, 90, 98],
             'Agent name':['Murthy', 'Singh', 'Murthy', 'Reddy Brother', 'Salim Pheku', 'Reddy Brother'],
@@ -35,6 +35,7 @@ require(['./jquery.min', './semantic/dist/semantic.min'], function() {
           { title: 'average Wait Time' }
         ];
         var onSelect = function(result, response) {
+          debugger
           var result = magic.answer(result.title);
           var resultArea = document.getElementById('result');
           resultArea.innerHTML = result.values.toString();
