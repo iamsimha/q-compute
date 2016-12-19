@@ -52,7 +52,7 @@ function fillTable(heading, data, domNode) {
 // require(['./jquery.min', './semantic/dist/semantic.min'], function() {
 
 // })
-require(['../../exprEvaluator'],   function(expr) {
+require(['../../scripts/exprEvaluator'],   function(expr) {
     var divNode = document.getElementById("data-table");
 
 
