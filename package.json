@@ -1,0 +1,12 @@
+{
+    "name": "q-compute",
+    "version": "1.0.0",
+    "author" : {
+        "name": "Jayasimha T",
+        "email": "jayast@cisco.com"
+    },
+    "dependencies": {
+        "body-parser" : "~1.8.1",
+        "express": "~4.9.0"
+    }
+}

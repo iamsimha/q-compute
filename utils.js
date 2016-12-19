@@ -1,4 +1,4 @@
-define(["./node_modules/lodash/lodash.min"], function(_) {
+define(["https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.2/lodash.min.js"], function(_) {
 	var utils = (function () {
 		/**************************************/
 		var synset = {'least':'min', 'mean':'average', 'arrange':'sort', 'largest':'max', 'total':'sum'};

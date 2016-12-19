@@ -65,7 +65,6 @@ require(['../../exprEvaluator'],   function(expr) {
           'Duration':[120, 135, 88, 225, 90, 98],
           'Agent name':['Murthy', 'Singh', 'Murthy', 'Reddy Brother', 'Salim Pheku', 'Reddy Brother'],
           'Wait time':[20, 15, 17, 19, 30, 10]};
-    debugger;
     fillTable(columns, dataset, divNode);
     if(expr) {
       magic = new expr(dataset, columns);

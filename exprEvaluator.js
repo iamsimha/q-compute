@@ -5,7 +5,7 @@ dataset : Javascrit Object, Key is the column name and value is an array of Obje
 columns : Javascript object representing the columns of the dataser.
  */
 
-define(["./start", "./node_modules/lodash/lodash.min", "./operators", './utils'], function(QI, _, ops, utils) {
+define(["./start", "https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.2/lodash.min.js", "./operators", './utils'], function(QI, _, ops, utils) {
 	var exprEvaluator = function (dataset, columns) {
 		var INAVLID_DATASET = 'dataset is not valid, use getErrorMsg() for more info',
 		expr = this;
