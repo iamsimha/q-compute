@@ -3,7 +3,6 @@ define(["./node_modules/lodash/lodash.min"], function(_) {
 		/**************************************/
 		var synset = {'least':'min', 'mean':'average', 'arrange':'sort', 'largest':'max', 'total':'sum'};
 
-
 		/**************************************/
 		function replaceSynonyms(tokens) {
 			for(var i = 0; i < tokens.length; i++) {
@@ -21,6 +20,11 @@ define(["./node_modules/lodash/lodash.min"], function(_) {
 			}
 		}
 
+		function normalizeString(s) {
+			s = s.toLowerCase();
+			s = s.replace(/\ +/, "");
+			return s;
+		}
 
 		function getUID() {
 			return Math.floor(Math.random()* 10000000) + "" + Math.floor(Math.random()* 10000000);
@@ -31,18 +35,23 @@ define(["./node_modules/lodash/lodash.min"], function(_) {
 			var result = [], numTokens = tokens.length;
 			for(var i = 0; i < numTokens; i++) {
 				if(!('uid' in tokens[i])) {
-					var t = {q:tokens[i].q};
+					var t = {q:tokens[i].q, original:tokens[i].original};
 					if('tag' in tokens[i]) t.tag = tokens[i].tag;
 					if('tagKey' in tokens[i]) t.tagKey = tokens[i].tagKey;
 					if('info' in tokens[i]) t.info = tokens[i].info;
 					result.push(t);
 				} else {
-					var q = [tokens[i].q], tag = tokens[i].tag, tagKey = tokens[i].tagKey, info = tokens[i].info||null;
+					var temp = {q:[tokens[i].q], original:[tokens[i].original]}, tag = tokens[i].tag, tagKey = tokens[i].tagKey, info = tokens[i].info||null;
 					while(i + 1 < numTokens && tokens[i].uid === tokens[i+1].uid) {
-						q.push(tokens[i+1].q);
+						temp.q.push(tokens[i+1].q);
+						temp.original.push(tokens[i+1].original);
 						i += 1;
 					}
-					result.push({q:q.join(delimiter), tag:tag, tagKey:tagKey, info:info});
+					result.push({q:temp.q.join(""),
+								original:temp.original.join(delimiter),
+								tag:tag,
+								tagKey:tagKey,
+								info:info});
 				}
 			}
 			return result;
@@ -67,7 +76,7 @@ define(["./node_modules/lodash/lodash.min"], function(_) {
 		}
 
 		function gramTagger(tokens, tagDict, gram_length, delimiter) {
-			if(!delimiter) delimiter = " ";
+			if(!delimiter) delimiter = "";
 			for(var i = 0, numTokens = tokens.length; i < tokens.length; i++) {
 				for(var j = i, currentTokens = []; j < i + gram_length && j < numTokens && i + gram_length <= numTokens; j++) {
 					currentTokens.push(tokens[j].q);
@@ -100,6 +109,7 @@ define(["./node_modules/lodash/lodash.min"], function(_) {
 				}
 			}
 		}
+
 		function bottomUpTagger(tokens, tagDict) {
 			tokens = _.cloneDeep(tokens);
 			tagTokens(tokens, tagDict);
@@ -110,7 +120,8 @@ define(["./node_modules/lodash/lodash.min"], function(_) {
 			bottomUpTagger:bottomUpTagger,
 			replaceSynonyms:replaceSynonyms,
 			simpleStemmer:simpleStemmer,
-			fillIgnore:fillIgnore
+			fillIgnore:fillIgnore,
+			normalizeString:normalizeString
 		}
 	})();
 

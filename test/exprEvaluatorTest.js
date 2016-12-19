@@ -214,4 +214,49 @@ describe.only("Verify that recursive answering works", function () {
 		compute = magic.answer(query);
 		assert.deepEqual([34.833333333333336], compute.values);
 	})
+
+	it("verify that selection queries work correctly", function() {
+		var query = "what is the average national temperature when country is India",
+		columns = [{name:'country', dataType:'STRING'}, {name:'national temperature', dataType:'DECIMAL'}, {name:'district', dataType:'STRING'}],
+		dataset = {'country':['India', 'USA', 'India', 'India', 'Britain'],
+					'national temperature':[40.5, 10.8, 31.5, 32.5, 12.5],
+					'capital':['Washinton DC', 'Berlin', 'Paris', 'Beijing', 'London']};
+		magic = new expr(dataset, columns);
+		compute = magic.answer(query);
+		assert.deepEqual([34.833333333333336], compute.values);
+
+		var query = "what is the average national temperature of India";
+		compute = magic.answer(query);
+		assert.deepEqual([34.833333333333336], compute.values);
+	})
+
+	it("case insenstive Operator", function() {
+		var query = "Average National temperature",
+		columns = [{name:'country', dataType:'STRING'}, {name:'national temperature', dataType:'DECIMAL'}, {name:'district', dataType:'STRING'}],
+		dataset = {'country':['India', 'USA', 'India', 'India', 'Britain'],
+					'national temperature':[40.5, 10.8, 31.5, 32.5, 12.5],
+					'capital':['Washinton DC', 'Berlin', 'Paris', 'Beijing', 'London']};
+		magic = new expr(dataset, columns);
+		compute = magic.answer(query);
+		assert.deepEqual([25.56], compute.values);
+
+		var query = "what is the average National temperature of india";
+		compute = magic.answer(query);
+		assert.deepEqual([34.833333333333336], compute.values);
+
+		var query = "what is the average National temperature of India";
+		compute = magic.answer(query);
+		assert.deepEqual([34.833333333333336], compute.values);
+	})
+
+	// it.only("should work for greater or than or less than queries", function() {
+	// 	var query = "Average National temperature less than 31",
+	// 	columns = [{name:'country', dataType:'STRING'}, {name:'national temperature', dataType:'DECIMAL'}, {name:'district', dataType:'STRING'}],
+	// 	dataset = {'country':['India', 'USA', 'India', 'India', 'Britain'],
+	// 				'national temperature':[40.5, 10.8, 31.5, 32.5, 12.5],
+	// 				'capital':['Washinton DC', 'Berlin', 'Paris', 'Beijing', 'London']};
+	// 	magic = new expr(dataset, columns);
+	// 	compute = magic.answer(query);
+	// 	assert.deepEqual([10.8, 12.5], compute.values);
+	// })
 })

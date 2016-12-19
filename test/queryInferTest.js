@@ -223,7 +223,5 @@ describe('Array', function() {
       { token: 'salary', position: { start: 14, end: 20 }, columnName: 'salary', dataType: 'DECIMAL' } ];
       assert.deepEqual(parsedQuery, QI.getColumnTagged(query, columns))
     })
-
-
   })
 });

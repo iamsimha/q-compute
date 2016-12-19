@@ -1,13 +1,4 @@
 define(function() {
-
-	var operators = {
-		'average':{tag:'OP'},
-		'max':{tag:'OP'},
-		'min':{tag:'OP'},
-		'median':{tag:'OP'},
-		'sum':{tag:'OP'}
-	};
-
 	function average(values) {
 		var ary = values, avg = 0, t = 1;
 		for(var i = 1; i <= ary.length; i++) {
@@ -52,21 +43,75 @@ define(function() {
 		return {
 			values:[result],
 			dataType:'DECIMAL'
-		}
+		};
+	}
+
+	function greaterthan(values, value) {
+		var result = values.filter(function(x){return x > value});
+		return {
+			values : result,
+			dataType : 'DECIMAL'
+		};
+	}
+
+	function lessthan(values) {
+		var result = values.filter(function(x) {return x < values});
+		return {
+			values : result,
+			dataType : 'DECIMAL'
+		};
+	}
+
+	function lessthanorequal(values) {
+		var result = values.filter(function(x) {return x <= values});
+		return {
+			values : result,
+			dataType : 'DECIMAL'
+		};
+	}
+
+	function greaterthanorequal(values) {
+		var result = values.filter(function(x) {return x >= values});
+		return {
+			values : result,
+			dataType : 'DECIMAL'
+		};
 	}
 
 	function sort(columnName) {
 
 	}
 
-	var DECIMAL_OPERATORS = {average:average, max:max, min:min, median:median, sort:sort, sum:sum},
+	var operators = {
+		'average':{tag:'OP', fn:average},
+		'max':{tag:'OP', fn:max},
+		'min':{tag:'OP', fn:min},
+		'median':{tag:'OP', fn:median},
+		'sum':{tag:'OP', fn:sum},
+		'lessthan':{tag:'OP', fn:lessthan},
+		'greaterthanorequal':{tag:'OP', fn:greaterthanorequal},
+		'greaterthan':{tag:'OP', fn:greaterthan},
+		'lessthanorequal':{tag:'OP', fn:lessthanorequal}
+	};
+	
+	var DECIMAL_OPERATORS = {average:average,
+							max:max,
+							min:min,
+							median:median,
+							sort:sort,
+							sum:sum,
+							greaterthan:greaterthan,
+							greaterthanorequal:greaterthanorequal,
+							lessthan:lessthan,
+							lessthanorequal:lessthanorequal},
 	e = {
-		DECIMAL_OPERATORS:DECIMAL_OPERATORS,
+		//DECIMAL_OPERATORS:DECIMAL_OPERATORS,
 		tagDict:operators
 	};
 	
 	if(typeof module != 'undefined') {
 	    module.exports = e;
 	}
+
 	return e;
 });
